@@ -1,11 +1,11 @@
 import { getServerSession, type NextAuthOptions } from "next-auth";
-import { userService } from "./services/user-service";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 
-const { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } = process.env;
+const { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, API_URL } = process.env;
 
 export const authOptions: NextAuthOptions = {
+  session: { strategy: "jwt" },
   providers: [
     GithubProvider({
       clientId: GITHUB_CLIENT_ID ?? "",
@@ -14,12 +14,27 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       id: "credentials",
       name: "credentials",
-      credentials: {},
-      async authorize(credentials: any) {
-        return userService.authenticate(
-          credentials.username,
-          credentials.password
-        );
+      credentials: {
+        email: {},
+        password: {},
+      },
+      async authorize(credentials) {
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify({
+            email: credentials?.email,
+            password: credentials?.password,
+          }),
+        });
+
+        const user = await response.json();
+
+        if (user && response.ok) return user;
+
+        return null;
       },
     }),
   ],
@@ -29,14 +44,45 @@ export const authOptions: NextAuthOptions = {
         return true;
       }
       if (account?.provider == "github") {
-        const { name, email } = user;
-        return userService.validateUser(name as string, email as string);
+        const { name, email, image } = user;
+
+        console.log(user);
+
+        const response = await fetch(`${API_URL}/auth/validate`, {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            email,
+            image,
+            providerAccount: "github",
+          }),
+        });
+
+        const validatedUser = await response.json();
+
+        console.log("validatedUser", validatedUser);
+
+        if (validatedUser && response.ok) return true;
+
+        return false;
       }
+
       return false;
+    },
+    async jwt({ token, user }) {
+      user && (token.user = user);
+      return token;
+    },
+    async session({ session, token }) {
+      session = token.user as any;
+      return session;
     },
   },
   pages: {
-    signIn: "/auth",
+    signIn: "/auth/login",
   },
 };
 

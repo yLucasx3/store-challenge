@@ -10,7 +10,7 @@ const GithubButton = () => {
       onClick={() => signIn("github", { callbackUrl: "/" })}
     >
       <GitHubLogoIcon className="mr-2 h-4 w-4" />
-      Sign in with Github
+      Github
     </Button>
   );
 };

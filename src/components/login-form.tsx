@@ -16,15 +16,16 @@ import {
 import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
+  email: z
+    .string()
+    .min(1, { message: "This field has to be filled." })
+    .email("This is not a valid email."),
   password: z
     .string()
     .min(6, { message: "Password must be at least 6 characters." }),
 });
 
-const SignInForm = () => {
+const LoginForm = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -33,11 +34,11 @@ const SignInForm = () => {
   const router = useRouter();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const { username, password } = values;
+    const { email, password } = values;
 
     const response = await signIn("credentials", {
       redirect: false,
-      username,
+      email,
       password,
     });
 
@@ -45,8 +46,8 @@ const SignInForm = () => {
       router.push("/");
     }
 
-    if (response?.status === 401) {
-      setErrorMessage("Invalid credentials!");
+    if (response?.status === 500) {
+      setErrorMessage("Something went wrong, try again later!");
     }
   };
 
@@ -58,11 +59,11 @@ const SignInForm = () => {
       >
         <FormField
           control={form.control}
-          name="username"
+          name="email"
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <Input placeholder="Enter your username" {...field} />
+                <Input type="email" placeholder="Enter your email" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -87,7 +88,7 @@ const SignInForm = () => {
         <span className="text-red-200 text-sm">{errorMessage}</span>
         <div className="flex flex-col space-y-2 pt-4">
           <Button type="submit" variant="default">
-            Sign in
+            Login
           </Button>
         </div>
       </form>
@@ -95,4 +96,4 @@ const SignInForm = () => {
   );
 };
 
-export default SignInForm;
+export default LoginForm;

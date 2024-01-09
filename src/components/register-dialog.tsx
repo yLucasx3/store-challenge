@@ -24,8 +24,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 const formSchema = z
   .object({
-    username: z.string().min(2, {
-      message: "Username must be at least 2 characters.",
+    name: z.string().min(2, {
+      message: "displayName must be at least 2 characters.",
     }),
     email: z
       .string()
@@ -43,33 +43,34 @@ const formSchema = z
     path: ["confirmPassword"],
   });
 
-const SignUpDialog = () => {
+const RegisterDialog = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const { username, email, password } = values;
+    const { name, email, password } = values;
 
-    const res = await fetch("/api/register", {
+    const response = await fetch(`http://localhost:3333/users`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        username,
+        name,
         email,
         password,
       }),
     });
 
-    if (res && res.status === 400) {
-      const { field, message } = await res.json();
+    console.log(response);
+    if (response && response.status === 400) {
+      const { field, message } = await response.json();
 
       form.setError(field, { message });
     }
 
-    if (res && res.status === 200) {
+    if (response && response.status === 200) {
       window.location.href = "/auth";
     }
   };
@@ -77,7 +78,7 @@ const SignUpDialog = () => {
   return (
     <Dialog>
       <DialogTrigger asChild className="w-full">
-        <Button variant="outline">Sign up</Button>
+        <Button variant="outline">Register</Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[425px]">
@@ -94,11 +95,11 @@ const SignUpDialog = () => {
           >
             <FormField
               control={form.control}
-              name="username"
+              name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input placeholder="Enter your username" {...field} />
+                    <Input placeholder="Enter your display name" {...field} />
                   </FormControl>
                   <FormDescription>
                     This is your public display name.
@@ -171,4 +172,4 @@ const SignUpDialog = () => {
   );
 };
 
-export default SignUpDialog;
+export default RegisterDialog;
