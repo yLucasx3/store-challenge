@@ -30,7 +30,7 @@ export default function RootLayout({
       >
         <Providers>
           <HeaderNavigation />
-          {children}
+          <main className="pt-16">{children}</main>
         </Providers>
       </body>
     </html>

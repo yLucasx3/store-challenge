@@ -11,15 +11,16 @@ import { Button } from "./ui/button";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { AvatarFallback } from "@radix-ui/react-avatar";
 import { signOut, useSession } from "next-auth/react";
+import Cart from "./cart";
 
 const HeaderNavigation = () => {
   const { data: session } = useSession();
 
   return (
-    <header className="flex justify-between items-center p-4 border-b border-slate-600 fixed w-full bg-background">
+    <header className="flex justify-between items-center border-b border-slate-600 w-full h-16 px-8 bg-background fixed z-50">
       <Link href="/" legacyBehavior passHref>
-        <h1 className="text-xl text-slate-300 cursor-pointer">
-          Store Challenge
+        <h1 className="text-xl font-semibold text-slate-200 cursor-pointer">
+          Store
         </h1>
       </Link>
 
@@ -62,6 +63,7 @@ const HeaderNavigation = () => {
           )}
         </div>
 
+        <Cart />
         {session && (
           <Button variant="destructive" onClick={() => signOut()}>
             Sign out

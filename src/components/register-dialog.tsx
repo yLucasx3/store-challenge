@@ -63,7 +63,6 @@ const RegisterDialog = () => {
       }),
     });
 
-    console.log(response);
     if (response && response.status === 400) {
       const { field, message } = await response.json();
 

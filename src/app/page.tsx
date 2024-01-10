@@ -1,26 +1,23 @@
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  image: string;
-}
+import OrderByProductsSelect from "@/components/order-by-products-select";
+import { Input } from "@/components/ui/input";
+import { fetchProducts } from "./action";
+import LoadMoreProducts from "@/components/load-more-products";
 
 const Home = async () => {
-  const response = await fetch(
-    "http://localhost:3333/products?page=1&pageSize=10",
-    {
-      method: "GET",
-    }
-  );
-
-  const { items } = await response.json();
+  const data = fetchProducts(1);
 
   return (
-    <main className="flex flex-col justify-center items-center h-screen">
-      {items.map((product: Product) => (
-        <span key={product.id}>{product.name}</span>
-      ))}
+    <main className="flex flex-col py-6">
+      <div className="container flex flex-col p-2 items-center">
+        <div className="flex w-2/3 gap-4">
+          <Input type="text" placeholder="Search products..." />
+          <OrderByProductsSelect />
+        </div>
+        <div className="columns-3 mx-auto space-y-4 py-16">
+          {data}
+          <LoadMoreProducts />
+        </div>
+      </div>
     </main>
   );
 };

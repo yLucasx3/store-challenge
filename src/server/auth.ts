@@ -46,8 +46,6 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider == "github") {
         const { name, email, image } = user;
 
-        console.log(user);
-
         const response = await fetch(`${API_URL}/auth/validate`, {
           method: "POST",
           headers: {
