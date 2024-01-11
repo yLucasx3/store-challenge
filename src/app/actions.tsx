@@ -6,12 +6,12 @@ import { ProductAPIResponse } from "@/types/product";
 export const getProducts = async (
   offset: number,
   limit: number,
-  filter?: { field: string; value: string | number }
+  query?: string
 ) => {
   try {
     let url = `${enviroment.apiUrl}/products?offset=${offset}&limit=${limit}`;
 
-    if (filter) url += `&filter[${filter.field}]=${filter.value}`;
+    if (query) url += `&filter[name]=${query}`;
 
     const response = await fetch(url, { cache: "no-store" });
 

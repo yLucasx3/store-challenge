@@ -5,10 +5,11 @@ import { getProducts } from "@/app/actions";
 import { useInView } from "react-intersection-observer";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { Input } from "./ui/input";
-import { useDebounce } from "use-debounce";
+import { useDebounce, useDebouncedCallback } from "use-debounce";
 import { ProductCard } from "./product-card";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { setProducts } from "@/redux/features/product-slice";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 interface ProductListProps {
   initialProducts: Product[];
@@ -20,11 +21,12 @@ const DEFAULT_PRODUCT_IMAGE =
   "https://www.eclosio.ong/wp-content/uploads/2018/08/default.png";
 
 const ProductList = ({ initialProducts }: ProductListProps) => {
-  const [filter, setFilter] = useState<string>("");
   const [offset, setOffset] = useState<number>(initialProducts.length);
   const [noMoreData, setNoMoreData] = useState(false);
 
-  const [debouncedFilter] = useDebounce(filter, 500);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
 
   const products = useAppSelector((state) => state.product.products);
   const dispatch = useAppDispatch();
@@ -43,43 +45,40 @@ const ProductList = ({ initialProducts }: ProductListProps) => {
     setOffset(offset + NUMBER_OF_PRODUCTS_TO_FETCH);
   };
 
-  const filterProducts = async () => {
-    if (!debouncedFilter.length) {
-      dispatch(setProducts(initialProducts));
-      setOffset(initialProducts.length);
-      return;
-    }
-
-    if (debouncedFilter.length) {
-      const apiProducts = await getProducts(0, NUMBER_OF_PRODUCTS_TO_FETCH, {
-        field: "name",
-        value: debouncedFilter,
-      });
-
-      dispatch(setProducts(apiProducts));
-      setOffset(0);
-    }
-  };
-
   useEffect(() => {
     dispatch(setProducts(initialProducts));
   }, []);
 
   useEffect(() => {
-    if (inView && !debouncedFilter.length) {
+    if (inView) {
       loadMoreProducts();
     }
   }, [inView]);
 
   useEffect(() => {
-    filterProducts();
-  }, [debouncedFilter]);
+    dispatch(setProducts(initialProducts));
+    setNoMoreData(false);
+    setOffset(initialProducts.length);
+  }, [initialProducts]);
+
+  const handleSearch = useDebouncedCallback((term: string) => {
+    const params = new URLSearchParams(searchParams);
+
+    if (term) {
+      params.set("query", term);
+    } else {
+      params.delete("query");
+    }
+
+    replace(`${pathname}?${params.toString()}`);
+  });
 
   return (
     <div className="flex flex-col gap-4 items-center justify-center w-11/12 md:w-8/12 xl:w-7/12 ">
       <Input
         type="text"
-        onChange={(e) => setFilter(e.target.value)}
+        onChange={(e) => handleSearch(e.target.value)}
+        defaultValue={searchParams.get("query")?.toString()}
         placeholder="Search products..."
       />
       <div className="flex flex-col items-center justify-center w-full">
