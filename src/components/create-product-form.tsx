@@ -32,18 +32,21 @@ const CreateProductForm = () => {
     const { name, price, description, image } = values;
 
     try {
-      const response = await fetch("http://localhost:3333/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name,
-          price,
-          description,
-          image,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/products`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            price,
+            description,
+            image,
+          }),
+        }
+      );
 
       if (response && response.ok) {
         toast({

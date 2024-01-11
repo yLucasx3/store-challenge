@@ -18,9 +18,12 @@ const DeleteProductAlertDialog = ({ productId }: { productId: string }) => {
   const { toast } = useToast();
 
   const handleAccept = async (id: string) => {
-    const response = await fetch(`http://localhost:3333/products/${id}`, {
-      method: "DELETE",
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/products/${id}`,
+      {
+        method: "DELETE",
+      }
+    );
 
     if (response && response.ok) {
       toast({

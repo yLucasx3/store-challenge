@@ -49,19 +49,22 @@ const EditProductDialog = ({ product }: EditProductDialogProps) => {
     const { name, price, description, image } = values;
 
     try {
-      const response = await fetch("http://localhost:3333/products", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: product.id,
-          name,
-          price,
-          description,
-          image,
-        }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/products`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: product.id,
+            name,
+            price,
+            description,
+            image,
+          }),
+        }
+      );
 
       if (response && response.ok) {
         toast({

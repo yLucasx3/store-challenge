@@ -7,7 +7,7 @@ declare global {
       GITHUB_CLIENT_ID: string;
       GITHUB_CLIENT_SECRET: string;
       MONGODB_URI: string;
-      API_URL: string;
+      NEXT_PUBLIC_API_URL: string;
     }
   }
 }

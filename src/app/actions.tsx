@@ -8,7 +8,9 @@ export const getProducts = async (
   filter?: { field: string; value: string | number }
 ) => {
   try {
-    let url = `http://localhost:3333/products?offset=${offset}&limit=${limit}`;
+    let url = `${process.env.NEXT_PUBLIC_API_URL}/products?offset=${offset}&limit=${limit}`;
+
+    console.log(url);
 
     if (filter) url += `&filter[${filter.field}]=${filter.value}`;
 
@@ -16,7 +18,7 @@ export const getProducts = async (
 
     const { items: products } = (await response.json()) as ProductAPIResponse;
 
-    return products;
+    return products || [];
   } catch (error: unknown) {
     console.log(error);
     throw new Error(`An error happened: ${error}`);
