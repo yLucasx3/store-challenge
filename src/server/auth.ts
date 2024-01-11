@@ -1,8 +1,9 @@
 import { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
+import { enviroment } from "./enviroment";
 
-const { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, API_URL } = process.env;
+const { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } = process.env;
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
@@ -19,7 +20,7 @@ export const authOptions: NextAuthOptions = {
         password: {},
       },
       async authorize(credentials) {
-        const response = await fetch(`${API_URL}/auth/login`, {
+        const response = await fetch(`${enviroment.apiUrl}/auth/login`, {
           method: "POST",
           headers: {
             "Content-type": "application/json",
@@ -46,7 +47,7 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider == "github") {
         const { name, email, image } = user;
 
-        const response = await fetch(`${API_URL}/auth/validate`, {
+        const response = await fetch(`${enviroment.apiUrl}/auth/validate`, {
           method: "POST",
           headers: {
             "Content-type": "application/json",

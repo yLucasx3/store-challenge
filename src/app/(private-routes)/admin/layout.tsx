@@ -5,7 +5,7 @@ import { getServerAuthSession } from "@/server/auth";
 const PrivateLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await getServerAuthSession();
 
-  if (!session) redirect("/auth/login");
+  if (!session) redirect("/login");
 
   return <section>{children}</section>;
 };

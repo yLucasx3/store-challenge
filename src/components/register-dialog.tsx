@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { enviroment } from "@/server/enviroment";
+import { useToast } from "./ui/use-toast";
 
 const formSchema = z
   .object({
@@ -44,6 +46,7 @@ const formSchema = z
   });
 
 const RegisterDialog = () => {
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
@@ -51,26 +54,35 @@ const RegisterDialog = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const { name, email, password } = values;
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-      }),
-    });
+    try {
+      const response = await fetch(`${enviroment.apiUrl}/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
+      });
 
-    if (response && response.status === 400) {
-      const { field, message } = await response.json();
+      if (response?.status === 400) {
+        const { field, message } = await response.json();
 
-      form.setError(field, { message });
-    }
+        form.setError(field, { message });
+      }
 
-    if (response && response.status === 200) {
-      window.location.href = "/auth";
+      if (response?.ok) {
+        window.location.href = "/login";
+      }
+    } catch (error) {
+      toast({
+        title: "Error creating user, please contact support!",
+        description: String(error),
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
@@ -119,10 +131,10 @@ const RegisterDialog = () => {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
                   <FormDescription>
                     This is the email you will use to access the application.
                   </FormDescription>
-                  <FormMessage />
                 </FormItem>
               )}
             />

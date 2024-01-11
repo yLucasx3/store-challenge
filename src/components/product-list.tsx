@@ -6,7 +6,6 @@ import { useInView } from "react-intersection-observer";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { Input } from "./ui/input";
 import { useDebounce } from "use-debounce";
-import OrderByProductsSelect from "./order-by-products-select";
 import { ProductCard } from "./product-card";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { setProducts } from "@/redux/features/product-slice";
@@ -21,13 +20,14 @@ const DEFAULT_PRODUCT_IMAGE =
   "https://www.eclosio.ong/wp-content/uploads/2018/08/default.png";
 
 const ProductList = ({ initialProducts }: ProductListProps) => {
-  const products = useAppSelector((state) => state.product.products);
-  const dispatch = useAppDispatch();
-
   const [filter, setFilter] = useState<string>("");
   const [offset, setOffset] = useState<number>(initialProducts.length);
   const [noMoreData, setNoMoreData] = useState(false);
+
   const [debouncedFilter] = useDebounce(filter, 500);
+
+  const products = useAppSelector((state) => state.product.products);
+  const dispatch = useAppDispatch();
 
   const { ref, inView } = useInView();
 
@@ -76,31 +76,33 @@ const ProductList = ({ initialProducts }: ProductListProps) => {
   }, [debouncedFilter]);
 
   return (
-    <div className="flex flex-col w-7/12 gap-4 items-center">
-      <div className="flex w-full gap-4">
-        <Input
-          type="text"
-          onChange={(e) => setFilter(e.target.value)}
-          placeholder="Search products..."
-        />
-        <OrderByProductsSelect />
-      </div>
-      <div className="flex flex-col items-center w-full">
-        <div className="w-full grid grid-cols-3 gap-4">
-          {products.map((product, index) => {
+    <div className="flex flex-col gap-4 items-center justify-center w-11/12 md:w-8/12 xl:w-7/12 ">
+      <Input
+        type="text"
+        onChange={(e) => setFilter(e.target.value)}
+        placeholder="Search products..."
+      />
+      <div className="flex flex-col items-center justify-center w-full">
+        <div className="w-full grid items-center justify-center gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+          {products.map((product) => {
             const { id, name, price, image, discountPercentage } = product;
 
             return (
-              <ProductCard.Root key={id} index={index}>
+              <ProductCard.Root key={id}>
                 <ProductCard.Header
                   title={name}
                   image={image ?? DEFAULT_PRODUCT_IMAGE}
                 />
-                <ProductCard.Content
-                  name={name}
-                  price={price}
-                  discountPercentage={discountPercentage}
-                />
+                <ProductCard.Content name={name}>
+                  {discountPercentage ? (
+                    <ProductCard.WithDiscount
+                      price={price}
+                      discountPercentage={discountPercentage}
+                    />
+                  ) : (
+                    <ProductCard.WithoutDiscount price={price} />
+                  )}
+                </ProductCard.Content>
                 <ProductCard.Footer product={product} />
               </ProductCard.Root>
             );

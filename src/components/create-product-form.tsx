@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "./ui/use-toast";
 import RequiredFieldIndicator from "./required-field-indicator";
 import { productSchema } from "@/lib/zodSchemas";
+import { enviroment } from "@/server/enviroment";
 
 const CreateProductForm = () => {
   const router = useRouter();
@@ -32,21 +33,18 @@ const CreateProductForm = () => {
     const { name, price, description, image } = values;
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/products`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name,
-            price,
-            description,
-            image,
-          }),
-        }
-      );
+      const response = await fetch(`${enviroment.apiUrl}/products`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          price,
+          description,
+          image,
+        }),
+      });
 
       if (response && response.ok) {
         toast({
@@ -60,10 +58,9 @@ const CreateProductForm = () => {
       }
     } catch (error) {
       toast({
-        title: "Error creating product!",
+        title: "Error creating product, please contact support.",
         description: String(error),
         variant: "destructive",
-        duration: 5000,
       });
     }
   };

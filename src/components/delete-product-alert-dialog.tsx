@@ -13,27 +13,33 @@ import {
 } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
+import { enviroment } from "@/server/enviroment";
 
 const DeleteProductAlertDialog = ({ productId }: { productId: string }) => {
   const { toast } = useToast();
 
   const handleAccept = async (id: string) => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/products/${id}`,
-      {
+    try {
+      const response = await fetch(`${enviroment.apiUrl}/products/${id}`, {
         method: "DELETE",
-      }
-    );
-
-    if (response && response.ok) {
-      toast({
-        description: "Product has been deleted.",
-        duration: 2800,
       });
 
-      setTimeout(() => {
-        window.location.href = window.location.href;
-      }, 3000);
+      if (response.ok) {
+        toast({
+          description: "Product has been deleted.",
+          duration: 2800,
+        });
+
+        setTimeout(() => {
+          window.location.href = window.location.href;
+        }, 3000);
+      }
+    } catch (error) {
+      toast({
+        title: "Error deleting product, please contact support.",
+        description: String(error),
+        variant: "destructive",
+      });
     }
   };
 

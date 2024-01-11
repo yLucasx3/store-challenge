@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import * as z from "zod";
 import { signIn } from "next-auth/react";
-import { useState } from "react";
 import {
   Form,
   FormControl,
@@ -14,6 +13,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
+import { useToast } from "./ui/use-toast";
 
 const formSchema = z.object({
   email: z
@@ -26,28 +26,30 @@ const formSchema = z.object({
 });
 
 const LoginForm = () => {
-  const [errorMessage, setErrorMessage] = useState("");
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
+  const { toast } = useToast();
 
   const router = useRouter();
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const { email, password } = values;
 
-    const response = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
+    try {
+      const response = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
 
-    if (response?.ok) {
-      router.push("/");
-    }
-
-    if (response?.status === 500) {
-      setErrorMessage("Something went wrong, try again later!");
+      if (response?.ok) {
+        router.push("/admin/products");
+      }
+    } catch (error) {
+      toast({
+        description: "Error when trying to log in, please contact support.",
+      });
     }
   };
 
@@ -85,7 +87,6 @@ const LoginForm = () => {
             </FormItem>
           )}
         />
-        <span className="text-red-200 text-sm">{errorMessage}</span>
         <div className="flex flex-col space-y-2 pt-4">
           <Button type="submit" variant="default">
             Login

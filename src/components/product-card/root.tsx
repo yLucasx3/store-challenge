@@ -5,16 +5,7 @@ import { ComponentProps } from "react";
 
 type CardProps = ComponentProps<typeof Card>;
 
-interface ProductCardRootProps extends CardProps {
-  index: number;
-}
-
-const ProductCardRoot = ({
-  index,
-  className,
-  children,
-  ...props
-}: ProductCardRootProps) => {
+const ProductCardRoot = ({ className, children, ...props }: CardProps) => {
   return (
     <MotionDiv
       variants={{
@@ -24,7 +15,7 @@ const ProductCardRoot = ({
       initial="hidden"
       animate="visible"
       transition={{
-        delay: index * 0.25,
+        delay: 0.3,
         ease: "easeInOut",
         duration: 0.5,
       }}

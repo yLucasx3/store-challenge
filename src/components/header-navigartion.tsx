@@ -11,7 +11,6 @@ import { Button } from "./ui/button";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { AvatarFallback } from "@radix-ui/react-avatar";
 import { signOut, useSession } from "next-auth/react";
-import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import Cart from "./cart";
 
 const HeaderNavigation = () => {
@@ -28,7 +27,7 @@ const HeaderNavigation = () => {
       {session && session.user && (
         <NavigationMenu>
           <NavigationMenuList>
-            <NavigationMenuItem>
+            <NavigationMenuItem className="hidden md:flex">
               <Link href="/" legacyBehavior passHref>
                 <NavigationMenuLink
                   className={navigationMenuTriggerStyle()}
@@ -49,9 +48,9 @@ const HeaderNavigation = () => {
         </NavigationMenu>
       )}
 
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-2 items-center ">
         {session && session.user && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 hidden lg:flex">
             <Avatar>
               <AvatarImage
                 src={session?.user?.image || "https://github.com/shadcn.png"}
@@ -67,11 +66,10 @@ const HeaderNavigation = () => {
 
         {session ? (
           <Button variant="destructive" onClick={() => signOut()}>
-            <ArrowLeftIcon className="mr-2" />
             Sign out
           </Button>
         ) : (
-          <Link href="/auth/login">
+          <Link href="/login">
             <Button>Login or register</Button>
           </Link>
         )}

@@ -1,5 +1,6 @@
 "use server";
 
+import { enviroment } from "@/server/enviroment";
 import { ProductAPIResponse } from "@/types/product";
 
 export const getProducts = async (
@@ -8,9 +9,7 @@ export const getProducts = async (
   filter?: { field: string; value: string | number }
 ) => {
   try {
-    let url = `${process.env.NEXT_PUBLIC_API_URL}/products?offset=${offset}&limit=${limit}`;
-
-    console.log(url);
+    let url = `${enviroment.apiUrl}/products?offset=${offset}&limit=${limit}`;
 
     if (filter) url += `&filter[${filter.field}]=${filter.value}`;
 

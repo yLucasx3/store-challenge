@@ -27,6 +27,7 @@ import {
 import { Textarea } from "./ui/textarea";
 import RequiredFieldIndicator from "./required-field-indicator";
 import { productSchema } from "@/lib/zodSchemas";
+import { enviroment } from "@/server/enviroment";
 
 interface EditProductDialogProps {
   product: Product;
@@ -50,14 +51,13 @@ const EditProductDialog = ({ product }: EditProductDialogProps) => {
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/products`,
+        `${enviroment.apiUrl}/products/${product.id}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            id: product.id,
             name,
             price,
             description,
@@ -78,10 +78,9 @@ const EditProductDialog = ({ product }: EditProductDialogProps) => {
       }
     } catch (error) {
       toast({
-        title: "Error creating product!",
+        title: "Error editing product, please contact support.",
         description: String(error),
         variant: "destructive",
-        duration: 5000,
       });
     }
   };
@@ -173,7 +172,9 @@ const EditProductDialog = ({ product }: EditProductDialogProps) => {
               )}
             />
             <DialogFooter>
-              <Button type="submit">Save changes</Button>
+              <Button type="submit" disabled={!form.formState.isDirty}>
+                Save changes
+              </Button>
             </DialogFooter>
           </form>
         </Form>

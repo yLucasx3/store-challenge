@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -32,7 +33,6 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import { PlusIcon } from "@radix-ui/react-icons";
 
 interface DataTableProps<TData, TValue> {

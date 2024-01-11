@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "./ui/button";
-import { ArrowRightIcon, BackpackIcon } from "@radix-ui/react-icons";
+import { ArrowRightIcon } from "@radix-ui/react-icons";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import Image from "next/image";
 import {
@@ -19,12 +19,16 @@ import {
   subtractQuantityOfProductsToCart,
 } from "@/redux/features/cart-slice";
 import { ProductCart } from "@/types/product";
+import { formatToCurrency } from "@/lib/utils";
+import { Badge } from "./ui/badge";
 
 const DEFAULT_PRODUCT_IMAGE =
   "https://www.eclosio.ong/wp-content/uploads/2018/08/default.png";
 
 const Cart = () => {
   const { items, amount } = useAppSelector((state) => state.cart);
+
+  const totalItems = items.reduce((acc, curr) => acc + curr.quantity, 0);
 
   const dispatch = useAppDispatch();
 
@@ -43,12 +47,16 @@ const Cart = () => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline">
-          <BackpackIcon className="h-4 w-4 mr-2" />
+        <Button variant="outline" className="relative">
+          {totalItems ? (
+            <Badge className="absolute -top-2 -right-5" variant="destructive">
+              {totalItems}
+            </Badge>
+          ) : null}
           Cart
         </Button>
       </SheetTrigger>
-      <SheetContent className="flex flex-col">
+      <SheetContent className="flex flex-col w-full md:w-2/3 lg:w-1/3">
         <SheetHeader>
           <SheetTitle>My Cart</SheetTitle>
         </SheetHeader>
@@ -60,7 +68,7 @@ const Cart = () => {
                 const { id, name, price, image, description, quantity } =
                   product;
                 return (
-                  <div className="" key={id}>
+                  <div key={id}>
                     <div className="flex gap-8 justify-between">
                       <div className="relative">
                         <span
@@ -125,7 +133,7 @@ const Cart = () => {
             <div className="flex justify-between">
               <span className="text-slate-300">Total</span>
               <span className="text-lg font-semibold">
-                ${amount.toFixed(2)}
+                {formatToCurrency(amount)}
               </span>
             </div>
             <SheetClose asChild className="mt-4">
