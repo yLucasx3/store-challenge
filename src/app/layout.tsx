@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import "../styles/global.css";
 import { Providers } from "./providers";
 import HeaderNavigation from "@/components/header-navigartion";
+import { Toaster } from "@/components/ui/toaster";
 
 export const fontSans = FontSans({
   subsets: ["latin"],
@@ -31,6 +32,7 @@ export default function RootLayout({
         <Providers>
           <HeaderNavigation />
           <main className="pt-16">{children}</main>
+          <Toaster />
         </Providers>
       </body>
     </html>

@@ -3,56 +3,41 @@
 import Image from "next/image";
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 import { CaretSortIcon, DotsHorizontalIcon } from "@radix-ui/react-icons";
-
-export type Product = {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  picture: string;
-};
+import { Product } from "@/types/product";
+import EditProductDialog from "@/components/edit-product-dialog";
+import DeleteProductAlertDialog from "@/components/delete-product-alert-dialog";
+import { formatToCurrency } from "@/lib/utils";
 
 export const columns: ColumnDef<Product>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-        className="mr-2"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "picture",
-    header: "Picture",
+    accessorKey: "image",
+    header: "Image",
     cell: ({ row }) => {
+      const image = row.getValue("image") as string;
+      const name = row.getValue("name") as string;
+
       return (
-        <Image src={row.getValue("picture")} alt="" width={64} height={64} />
+        <div style={{ width: "64px", height: "48px", position: "relative" }}>
+          <Image
+            src={image}
+            alt={name}
+            fill
+            sizes="100%, 100%"
+            draggable={false}
+            className="object-cover"
+            priority
+          />
+        </div>
       );
     },
   },
@@ -72,6 +57,7 @@ export const columns: ColumnDef<Product>[] = [
   },
   {
     accessorKey: "price",
+    size: 50,
     header: ({ column }) => {
       return (
         <Button
@@ -85,43 +71,51 @@ export const columns: ColumnDef<Product>[] = [
     },
     cell: ({ row }) => {
       const price = parseFloat(row.getValue("price"));
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(price);
+      const formatted = formatToCurrency(price);
 
-      return <div className="text-right font-medium">{formatted}</div>;
+      return <div className="text-left font-medium">{formatted}</div>;
     },
   },
   {
     accessorKey: "description",
     header: "Description",
+    cell: ({ row }) => {
+      const description = row.getValue("description") as string;
+
+      let truncatedDescription =
+        description.length > 70
+          ? description.substring(0, 65) + "..."
+          : description;
+
+      return <span title={description}>{truncatedDescription}</span>;
+    },
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      const payment = row.original;
+      const { id } = row.original;
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <DotsHorizontalIcon />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
-            >
-              Copy payment ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex gap-2">
+          <EditProductDialog product={row.original} />
+          <DeleteProductAlertDialog productId={id} />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <DotsHorizontalIcon />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>More Actions</DropdownMenuLabel>
+              <DropdownMenuItem
+                onClick={() => navigator.clipboard.writeText(id)}
+              >
+                Copy product ID
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       );
     },
   },

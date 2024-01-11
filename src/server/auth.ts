@@ -61,8 +61,6 @@ export const authOptions: NextAuthOptions = {
 
         const validatedUser = await response.json();
 
-        console.log("validatedUser", validatedUser);
-
         if (validatedUser && response.ok) return true;
 
         return false;

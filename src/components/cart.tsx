@@ -1,41 +1,142 @@
 "use client";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import { Button } from "./ui/button";
-import { BackpackIcon } from "@radix-ui/react-icons";
-import { useState } from "react";
+import { ArrowRightIcon, BackpackIcon } from "@radix-ui/react-icons";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import Image from "next/image";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+  SheetClose,
+} from "./ui/sheet";
+import { Separator } from "./ui/separator";
+import {
+  addQuantityOfProductsToCart,
+  removeProductFromCart,
+  subtractQuantityOfProductsToCart,
+} from "@/redux/features/cart-slice";
+import { ProductCart } from "@/types/product";
+
+const DEFAULT_PRODUCT_IMAGE =
+  "https://www.eclosio.ong/wp-content/uploads/2018/08/default.png";
 
 const Cart = () => {
-  const [open, setOpen] = useState(false);
+  const { items, amount } = useAppSelector((state) => state.cart);
+
+  const dispatch = useAppDispatch();
+
+  const handleRemoveProductFromCart = (product: ProductCart) => {
+    dispatch(removeProductFromCart(product));
+  };
+
+  const handleAddQuantityOfProductsToCart = (product: ProductCart) => {
+    dispatch(addQuantityOfProductsToCart(product));
+  };
+
+  const handleSubtractQuantityOfProductsToCart = (productId: string) => {
+    dispatch(subtractQuantityOfProductsToCart({ productId }));
+  };
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
+    <Sheet>
+      <SheetTrigger asChild>
         <Button variant="outline">
-          <BackpackIcon className="h-4 w-4" />
+          <BackpackIcon className="h-4 w-4 mr-2" />
+          Cart
         </Button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>Are you absolutely sure?</DrawerTitle>
-          <DrawerDescription>This action cannot be undone.</DrawerDescription>
-        </DrawerHeader>
-        <DrawerFooter>
-          <Button>Submit</Button>
-          <DrawerClose>
-            <Button variant="outline">Cancel</Button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+      </SheetTrigger>
+      <SheetContent className="flex flex-col">
+        <SheetHeader>
+          <SheetTitle>My Cart</SheetTitle>
+        </SheetHeader>
+
+        <div className="py-16 h-full overflow-y-auto">
+          {!items.length && <span>Cart is empty!</span>}
+          {items.length
+            ? items.map((product) => {
+                const { id, name, price, image, description, quantity } =
+                  product;
+                return (
+                  <div className="" key={id}>
+                    <div className="flex gap-8 justify-between">
+                      <div className="relative">
+                        <span
+                          className="absolute -top-3 -right-3 flex items-center justify-center font-light text-xs w-6 h-6 rounded-full bg-gray-600/75 cursor-pointer"
+                          onClick={() => handleRemoveProductFromCart(product)}
+                        >
+                          X
+                        </span>
+                        <Image
+                          src={image ?? DEFAULT_PRODUCT_IMAGE}
+                          alt={name}
+                          width={72}
+                          height={62}
+                          draggable={false}
+                        />
+                      </div>
+                      <div className="flex flex-col w-1/3 justify-start ">
+                        <span className="text-base truncate ...">{name}</span>
+                        <span className="text-sm text-slate-500 truncate ...">
+                          {description}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-2 items-end">
+                        <span className="font-semibold text-sm">
+                          ${(quantity * price).toFixed(2)}
+                        </span>
+                        <div className="flex items-center justify-around w-24 h-8 px-2 gap-4 border rounded-full">
+                          <span
+                            className="cursor-pointer font-semibold text-slate-500 text-xl"
+                            onClick={() =>
+                              handleSubtractQuantityOfProductsToCart(id)
+                            }
+                          >
+                            -
+                          </span>
+                          <span className="text-xs">{quantity}</span>
+                          <span
+                            className="cursor-pointer font-semibold text-slate-500 text-xl"
+                            onClick={() =>
+                              handleAddQuantityOfProductsToCart(product)
+                            }
+                          >
+                            +
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <Separator className="my-5" />
+                  </div>
+                );
+              })
+            : null}
+        </div>
+
+        <SheetFooter>
+          <div className="flex flex-col w-full gap-2">
+            <div className="flex justify-between">
+              <span className="text-slate-300">Shipping</span>
+              <span className="text-slate-300">Calculated at checkout</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between">
+              <span className="text-slate-300">Total</span>
+              <span className="text-lg font-semibold">
+                ${amount.toFixed(2)}
+              </span>
+            </div>
+            <SheetClose asChild className="mt-4">
+              <Button type="submit">
+                Proceed to Checkout <ArrowRightIcon className="ml-2" />
+              </Button>
+            </SheetClose>
+          </div>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 };
 

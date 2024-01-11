@@ -11,6 +11,7 @@ import { Button } from "./ui/button";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { AvatarFallback } from "@radix-ui/react-avatar";
 import { signOut, useSession } from "next-auth/react";
+import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import Cart from "./cart";
 
 const HeaderNavigation = () => {
@@ -33,12 +34,12 @@ const HeaderNavigation = () => {
                   className={navigationMenuTriggerStyle()}
                   color="red"
                 >
-                  Dashboard
+                  Home
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link href="/products" legacyBehavior passHref>
+              <Link href="/admin/products" legacyBehavior passHref>
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                   Products
                 </NavigationMenuLink>
@@ -49,26 +50,33 @@ const HeaderNavigation = () => {
       )}
 
       <div className="flex gap-4 items-center">
-        <div className="flex items-center gap-2">
-          <Avatar>
-            <AvatarImage
-              src={session?.user?.image || "https://github.com/shadcn.png"}
-            />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
-          {session && session.user && (
+        {session && session.user && (
+          <div className="flex items-center gap-2">
+            <Avatar>
+              <AvatarImage
+                src={session?.user?.image || "https://github.com/shadcn.png"}
+              />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+
             <span className="text-sm text-slate-300 cursor-pointer">
               Hi, {session.user.name}
             </span>
-          )}
-        </div>
+          </div>
+        )}
 
-        <Cart />
-        {session && (
+        {session ? (
           <Button variant="destructive" onClick={() => signOut()}>
+            <ArrowLeftIcon className="mr-2" />
             Sign out
           </Button>
+        ) : (
+          <Link href="/auth/login">
+            <Button>Login or register</Button>
+          </Link>
         )}
+
+        <Cart />
       </div>
     </header>
   );

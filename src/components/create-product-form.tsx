@@ -15,36 +15,66 @@ import {
 import { Input } from "@/components/ui/input";
 import * as z from "zod";
 import { Textarea } from "./ui/textarea";
-
-const formSchema = z.object({
-  name: z.string().min(2).max(50),
-  price: z.literal(7),
-  description: z.string().min(10).max(500),
-  picture: z.string(),
-});
-
-const RequiredIndicator = () => {
-  return <span className="text-red-200">*</span>;
-};
+import { useRouter } from "next/navigation";
+import { useToast } from "./ui/use-toast";
+import RequiredFieldIndicator from "./required-field-indicator";
+import { productSchema } from "@/lib/zodSchemas";
 
 const CreateProductForm = () => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const form = useForm<z.infer<typeof productSchema>>({
+    resolver: zodResolver(productSchema),
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  const onSubmit = async (values: z.infer<typeof productSchema>) => {
+    const { name, price, description, image } = values;
+
+    try {
+      const response = await fetch("http://localhost:3333/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          price,
+          description,
+          image,
+        }),
+      });
+
+      if (response && response.ok) {
+        toast({
+          description: "Product created with succefully.",
+          duration: 2900,
+        });
+
+        setTimeout(() => {
+          router.push("/admin/products");
+        }, 3000);
+      }
+    } catch (error) {
+      toast({
+        title: "Error creating product!",
+        description: String(error),
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
   };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Name <RequiredIndicator />
+                Name <RequiredFieldIndicator />
               </FormLabel>
               <FormControl>
                 <Input
@@ -66,10 +96,10 @@ const CreateProductForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Price <RequiredIndicator />
+                Price $ <RequiredFieldIndicator />
               </FormLabel>
               <FormControl>
-                <Input placeholder="Example: $225" {...field} />
+                <Input placeholder="Example: 199.99" {...field} />
               </FormControl>
               <FormDescription>
                 This is the name of the product that will appear prominently in
@@ -85,7 +115,7 @@ const CreateProductForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Description <RequiredIndicator />
+                Description <RequiredFieldIndicator />
               </FormLabel>
               <FormControl>
                 <Textarea
@@ -106,10 +136,10 @@ const CreateProductForm = () => {
         />
         <FormField
           control={form.control}
-          name="picture"
+          name="image"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Picture</FormLabel>
+              <FormLabel>Image</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Example: https://avatars.githubusercontent.com/u/46607418?s=48&v=4"
